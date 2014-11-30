@@ -136,9 +136,9 @@ h1 {
     padding-left: 1%;
 }
 
-#new-item-form{
-    /* this following width value affects the width of the textfield which fills 100% of this selector. */
-    width: 40%;
+#new-item-form .ui-input-text{
+    /* Set width of input text properly. */
+    width: 80%;
 }
 
 #new-item-form .ui-input-btn{
@@ -146,3 +146,16 @@ h1 {
     width: 40%;
 }
 
+/* Media Queries */
+@media screen and (min-width:600px){
+    #new-item-form .ui-input-text{
+        width: 40%;
+        float: left;
+        margin-right: 2%;
+    }
+
+    #new-item-form .ui-input-btn{
+        width: 30%;
+        float: left;
+    }
+}
