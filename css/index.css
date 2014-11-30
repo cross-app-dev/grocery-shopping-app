@@ -116,11 +116,17 @@ h1 {
 
 /* custom styling */
 .custom-checkbox{
-/*    outline: 1px solid red;*/
-    border-top-width: 0px;
-    border-bottom-width: 0px;
-    border-left-width: 0px;
-    border-right-width: 0px;
-    margin-top: 0px;
-    margin-bottom: 0px;
+    border-top-width: 0px !important;
+    border-bottom-width: 0px !important;
+    border-left-width: 0px !important;
+    border-right-width: 0px !important;
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
 }
+
+.no-offsets{
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+
