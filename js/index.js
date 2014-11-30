@@ -16,21 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-var DEBUG_MODE = true;
+var DEBUG_MODE = false;
+
+var utilities = {
+    getUlHtmlTag : function(listID){
+        var ulHtmlTag = '<ul data-role="listview" data-split-icon="delete" id="'+ listID + '">';
+        return ulHtmlTag;
+    },
+
+    getLiHtmlTag : function(liId){
+        return '<li><a href="#" class="no-offsets"><input type="checkbox" id="' +  liId+ '" name="' + liId +
+                            '"><label class="custom-checkbox" for="'+ liId+ '">' + liId +
+                            '</label></input></a><a href="#"></a></li>';
+    },
+
+    getUlClosingTag : function(){
+        return "</ul>";
+    }
+}
 
 /* this method is used to convert all array elements into unordered list HTML tag where list items are represented by array elements.
 Note that this method have been added to the Array object in JS so that any array can inherit this method and use it properly. */
-Array.prototype.toUnorderedList = function(){
+Array.prototype.toUnorderedList = function(listViewId){
     console.log("toUnorderedList is called");
-    var unorderedListTag = '<ul data-role="listview" data-split-icon="delete">';
-    var checkBoxTag = '<input type="checkbox" id="';
 
+    var unorderedListTag = utilities.getUlHtmlTag(listViewId);
     for (var i=0; i<this.length; i++){
-        unorderedListTag += '<li><a href="#" class="no-offsets">'+ checkBoxTag + this[i] + '" name="' + this[i]+
-                            '"><label class="custom-checkbox" for="'+this[i]+ '">' + this[i] +
-                            '</label></input></a><a href="#"></a></li>';
+        unorderedListTag += utilities.getLiHtmlTag(this[i]);
     }
-    unorderedListTag +="</ul>";
+    unorderedListTag += utilities.getUlClosingTag();
+
     return unorderedListTag;
 }
 
@@ -39,6 +54,7 @@ var shopping = {
     //local storage key name.
     localStorageKey : "grocery-show0017",
     listOfGroceries : [],
+    listViewId      : "shoppingListView",
 
     // Application Constructor
     initialize: function() {
@@ -57,6 +73,7 @@ var shopping = {
         } else {
             console.debug("Running application from desktop browser");
             this.onDeviceReady();
+            //document.addEventListener('DOMContentLoaded', this.onDeviceReady, false);
         }
 
     },
@@ -65,24 +82,81 @@ var shopping = {
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function() {
-        this.receivedEvent('deviceready');
+        shopping.receivedEvent('deviceready');
     },
     // Update DOM on a Received Event
     receivedEvent: function(id) {
         console.debug('Received Event: ' + id);
 
+        $("#new-item-btn").on("click", this.onAddNewItem);
         if(DEBUG_MODE)
-            listOfGroceries = ["apple","pinapple","milk"];
+            this.listOfGroceries = ["apple","pinapple","milk"];
         else
-            listOfGroceries = JSON.parse(localStorage.getItem(this.localStorageKey));
-        if(null !== listOfGroceries){
+            this.listOfGroceries = this.getItemsFromLocalStorage();
+        if(null !== this.listOfGroceries){
             console.log("key has value. Create listview");
-            var unorderedListHTML_Tag = listOfGroceries.toUnorderedList();
-            $(".ui-content").append(unorderedListHTML_Tag);
+            var unorderedListHTML_Tag = this.listOfGroceries.toUnorderedList(this.listViewId);
 
         }else{
             console.debug("key has no value");
+            /*Reset list to empty array instead of null. */
+            this.listOfGroceries = [];
+
+            /* create listview tag before adding any new items from the user. */
+            var unorderedListHTML_Tag = utilities.getUlHtmlTag(this.listViewId) +
+                                        utilities.getUlClosingTag();
         }
+
+        $(".ui-content").append(unorderedListHTML_Tag);
+    },
+
+    onAddNewItem : function(){
+        var newItem = shopping.getTxtInput();
+        console.log("Add item to listview");
+        shopping.addItemToListView(newItem);
+        console.log("Add item to list");
+        shopping.addItemToList(newItem);
+        console.log("Add item to localStorage");
+        console.log(this);
+        shopping.addItemToLocalStorage();
+        console.log("clear text field");
+        shopping.clearTxtField();
+    },
+
+    getTxtInput : function(){
+        return $("#item").val();
+    },
+
+    clearTxtField : function(){
+        $("#item").val("");
+    },
+
+    addItemToListView : function(newItem){
+        var newItemLiTag = utilities.getLiHtmlTag(newItem);
+        /* If you manipulate a listview via JavaScript (e.g. add new LI elements), you must call the refresh method on it to update the
+            visual styling. But I found that the checkbox input misses some jquery-mobile classes so trigger listview creation event
+            to load listview again and apply these missing classes.
+        */
+        $('#'+this.listViewId).append(newItemLiTag).listview("refresh").trigger("create");
+    },
+
+    addItemToList : function(newItem){
+        /* Make sure that the item is not saved before */
+        if(-1 === shopping.listOfGroceries.indexOf(newItem)){
+            shopping.listOfGroceries.push(newItem);
+        }else{
+            console.warn("Display popup to the user about duplicate value");
+            /*TODO: dispaly warning dialog/popup to the user about the duplicated value. */
+        }
+        console.debug(shopping.listOfGroceries);
+    },
+
+    addItemToLocalStorage : function(){
+        localStorage.setItem(this.localStorageKey, JSON.stringify(this.listOfGroceries));
+    },
+
+    getItemsFromLocalStorage : function(){
+        return JSON.parse(localStorage.getItem(this.localStorageKey));
     }
 };
 
