@@ -16,7 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-var app = {
+var DEBUG_MODE = true;
+
+/* this method is used to convert all array elements into unordered list HTML tag where list items are represented by array elements.
+Note that this method have been added to the Array object in JS so that any array can inherit this method and use it properly. */
+Array.prototype.toUnorderedList = function(){
+    console.log("toUnorderedList is called");
+    var unorderedListTag = '<ul data-role="listview">';
+    for (var i=0; i<this.length; i++){
+        unorderedListTag += "<li>" + this[i] + "</li>";
+    }
+    unorderedListTag +="</ul>";
+    return unorderedListTag;
+}
+
+var shopping = {
+
+    //local storage key name.
+    localStorageKey : "grocery-show0017",
+    listOfGroceries : [],
+
     // Application Constructor
     initialize: function() {
         this.bindEvents();
@@ -26,26 +45,41 @@ var app = {
     // Bind any events that are required on startup. Common events are:
     // 'load', 'deviceready', 'offline', and 'online'.
     bindEvents: function() {
-        document.addEventListener('deviceready', this.onDeviceReady, false);
+
+        /* Check whether user runs application from Desktop browser or Device*/
+        if (navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/)) {
+            console.debug("Running application from device");
+            document.addEventListener('deviceready', this.onDeviceReady, false);
+        } else {
+            console.debug("Running application from desktop browser");
+            this.onDeviceReady();
+        }
+
     },
     // deviceready Event Handler
     //
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function() {
-        app.receivedEvent('deviceready');
+        this.receivedEvent('deviceready');
     },
     // Update DOM on a Received Event
     receivedEvent: function(id) {
-        var parentElement = document.getElementById(id);
-        var listeningElement = parentElement.querySelector('.listening');
-        var receivedElement = parentElement.querySelector('.received');
+        console.debug('Received Event: ' + id);
 
-        listeningElement.setAttribute('style', 'display:none;');
-        receivedElement.setAttribute('style', 'display:block;');
+        if(DEBUG_MODE)
+            listOfGroceries = ["apple","pinapple","milk"];
+        else
+            listOfGroceries = JSON.parse(localStorage.getItem(this.localStorageKey));
+        if(null !== listOfGroceries){
+            console.log("key has value. Create listview");
+            var unorderedListHTML_Tag = listOfGroceries.toUnorderedList();
+            $(".ui-content").append(unorderedListHTML_Tag);
 
-        console.log('Received Event: ' + id);
+        }else{
+            console.debug("key has no value");
+        }
     }
 };
 
-app.initialize();
+shopping.initialize();
