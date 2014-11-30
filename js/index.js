@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-var DEBUG_MODE = false;
-
 var utilities = {
     getUlHtmlTag : function(listID){
         var ulHtmlTag = '<ul data-role="listview" data-split-icon="delete" id="'+ listID + '">';
@@ -89,10 +87,7 @@ var shopping = {
         console.debug('Received Event: ' + id);
 
         $("#new-item-btn").on("click", this.onAddNewItem);
-        if(DEBUG_MODE)
-            this.listOfGroceries = ["apple","pinapple","milk"];
-        else
-            this.listOfGroceries = this.getItemsFromLocalStorage();
+        this.listOfGroceries = this.getItemsFromLocalStorage();
         if(null !== this.listOfGroceries){
             console.log("key has value. Create listview");
             var unorderedListHTML_Tag = this.listOfGroceries.toUnorderedList(this.listViewId);
