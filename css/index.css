@@ -114,8 +114,9 @@ h1 {
     -webkit-animation:fade 3000ms infinite;
 }
 
-/* custom styling */
+/* custom styling for listview and checkbox */
 .custom-checkbox{
+    /* important keyword must be used to override the higher specificity weights inside jquery-mobile css selectors*/
     border-top-width: 0px !important;
     border-bottom-width: 0px !important;
     border-left-width: 0px !important;
@@ -125,8 +126,23 @@ h1 {
 }
 
 .no-offsets{
+    /* important keyword must be used to override the higher specificity weights inside jquery-mobile css selectors*/
     margin: 0 !important;
     padding: 0 !important;
 }
 
+/* footer styling */
+#foot{
+    padding-left: 1%;
+}
+
+#new-item-form{
+    /* this following width value affects the width of the textfield which fills 100% of this selector. */
+    width: 40%;
+}
+
+#new-item-form .ui-input-btn{
+    /* button width is typicall function of value of attribute 'value' of th input button. increase its width properly. */
+    width: 40%;
+}
 

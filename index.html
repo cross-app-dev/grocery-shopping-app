@@ -39,8 +39,15 @@
         </div>
         <div class="ui-content">
         </div>
-        <div data-role="footer" data-position="fixed">
-            <p>footer placeholder</p>
+        <div data-role="footer" data-position="fixed" id="foot">
+            <form action="#" name="new-item-form" method="post" id="new-item-form">
+<!--                Add labels for accessibility options but keep them hidden-->
+                <label for="item" class="ui-hidden-accessible">Enter new Item</label>
+                <input type="text" name="item" id="item" placeholder="enter new item">
+
+                <label for="new-item-btn" class="ui-hidden-accessible">Add new Item</label>
+                <input type="button" value="Add item" data-icon="plus" id="new-item-btn">
+            </form>
         </div>
     </div>
         <script type="text/javascript" src="cordova.js"></script>
