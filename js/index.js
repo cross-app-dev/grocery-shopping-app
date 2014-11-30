@@ -22,9 +22,9 @@ var DEBUG_MODE = true;
 Note that this method have been added to the Array object in JS so that any array can inherit this method and use it properly. */
 Array.prototype.toUnorderedList = function(){
     console.log("toUnorderedList is called");
-    var unorderedListTag = '<ul data-role="listview">';
+    var unorderedListTag = '<ul data-role="listview" data-split-icon="delete">';
     for (var i=0; i<this.length; i++){
-        unorderedListTag += "<li>" + this[i] + "</li>";
+        unorderedListTag += '<li><a href="#">' + this[i] + '</a><a href="#"></a></li>';
     }
     unorderedListTag +="</ul>";
     return unorderedListTag;
