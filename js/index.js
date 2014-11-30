@@ -23,8 +23,10 @@ Note that this method have been added to the Array object in JS so that any arra
 Array.prototype.toUnorderedList = function(){
     console.log("toUnorderedList is called");
     var unorderedListTag = '<ul data-role="listview" data-split-icon="delete">';
+    var checkBoxTag = '<label style="border-top-width: 0px;margin-top: 0px;border-bottom-width: 0px;margin-bottom: 0px;border-left-width: 0px;border-right-width: 0px;"><input type="checkbox"/>';
+
     for (var i=0; i<this.length; i++){
-        unorderedListTag += '<li><a href="#">' + this[i] + '</a><a href="#"></a></li>';
+        unorderedListTag += '<li><a href="#">'+checkBoxTag + this[i] + '</label></a><a href="#"></a></li>';
     }
     unorderedListTag +="</ul>";
     return unorderedListTag;

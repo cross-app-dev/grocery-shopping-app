@@ -113,3 +113,14 @@ h1 {
     animation:fade 3000ms infinite;
     -webkit-animation:fade 3000ms infinite;
 }
+
+/* custom styling */
+.custom-checkbox{
+/*    outline: 1px solid red;*/
+    border-top-width: 0px;
+    border-bottom-width: 0px;
+    border-left-width: 0px;
+    border-right-width: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
