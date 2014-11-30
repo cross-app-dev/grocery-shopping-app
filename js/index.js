@@ -87,11 +87,17 @@ var shopping = {
         console.debug('Received Event: ' + id);
 
         $("#new-item-btn").on("click", this.onAddNewItem);
+        $(document).on("listviewcreate", function(event, ui){
+            console.log("list view is created");
+            /* upon creation of listview, set click listener for the delete button. */
+            $("li a:nth-child(2)").on("click", shopping.onRemoveItem);
+            $('input[type="checkbox"]').on("click",shopping.onItemCompleted);
+        });
+
         this.listOfGroceries = this.getItemsFromLocalStorage();
         if(null !== this.listOfGroceries){
             console.log("key has value. Create listview");
             var unorderedListHTML_Tag = this.listOfGroceries.toUnorderedList(this.listViewId);
-
         }else{
             console.debug("key has no value");
             /*Reset list to empty array instead of null. */
@@ -118,6 +124,14 @@ var shopping = {
         shopping.clearTxtField();
     },
 
+    onRemoveItem : function(){
+        console.debug("delete btn is clicked");
+    },
+
+    onItemCompleted : function(){
+        console.log("Check box is clicked");
+    },
+
     getTxtInput : function(){
         return $("#item").val();
     },
@@ -131,8 +145,13 @@ var shopping = {
         /* If you manipulate a listview via JavaScript (e.g. add new LI elements), you must call the refresh method on it to update the
             visual styling. But I found that the checkbox input misses some jquery-mobile classes so trigger listview creation event
             to load listview again and apply these missing classes.
+            Another performant way is to refresh the checkbox and listview to update new items only instead of triggering creation
+            event for the whole listview.
         */
-        $('#'+this.listViewId).append(newItemLiTag).listview("refresh").trigger("create");
+
+        //$('#'+this.listViewId).append(newItemLiTag).listview("refresh").trigger("create");
+        $('#'+this.listViewId).append(newItemLiTag).listview("refresh");
+        $('input[type="checkbox"]').checkboxradio().checkboxradio("refresh");
     },
 
     addItemToList : function(newItem){
