@@ -86,14 +86,14 @@ var shopping = {
     receivedEvent: function(id) {
         console.debug('Received Event: ' + id);
 
+        /* set click listener for add button. */
         $("#new-item-btn").on("click", this.onAddNewItem);
-        $(document).on("listviewcreate", function(event, ui){
-            console.log("list view is created");
-            /* upon creation of listview, set click listener for the delete button. */
-            $("li a:nth-child(2)").on("click", shopping.onRemoveItem);
-            $('input[type="checkbox"]').on("click",shopping.onItemCompleted);
-        });
 
+        /* set click listener for remove/done buttons in case list of groceries is not empty. Need to set same listeners for
+            dynamically created items inside addItemToListView method. */
+        $(document).on("listviewcreate", this.onListViewCreate);
+
+        /* Get list of grocery items that are saved in local storage (if any) then create listview. */
         this.listOfGroceries = this.getItemsFromLocalStorage();
         if(null !== this.listOfGroceries){
             console.log("key has value. Create listview");
@@ -111,16 +111,22 @@ var shopping = {
         $(".ui-content").append(unorderedListHTML_Tag);
     },
 
+    onListViewCreate : function(event, ui){
+        console.log("list view is created");
+        /* upon creation of listview, set click listener for the delete button and checkbox */
+        shopping.updateListViewListeners();
+    },
+
+    updateListViewListeners : function(){
+        $("li a.ui-icon-delete").on("click", shopping.onRemoveItem);
+        $('a input[type="checkbox"]').on("click",shopping.onItemCompleted);
+    },
+
     onAddNewItem : function(){
         var newItem = shopping.getTxtInput();
-        console.log("Add item to listview");
         shopping.addItemToListView(newItem);
-        console.log("Add item to list");
         shopping.addItemToList(newItem);
-        console.log("Add item to localStorage");
-        console.log(this);
         shopping.addItemToLocalStorage();
-        console.log("clear text field");
         shopping.clearTxtField();
     },
 
@@ -149,9 +155,13 @@ var shopping = {
             event for the whole listview.
         */
 
-        //$('#'+this.listViewId).append(newItemLiTag).listview("refresh").trigger("create");
+        /* For some reason, when I programtically trigger the event of listview creation, it did not invoke onListViewCreate!!*/
+//        $('#'+this.listViewId).append(newItemLiTag).listview("refresh").trigger("create");
         $('#'+this.listViewId).append(newItemLiTag).listview("refresh");
         $('input[type="checkbox"]').checkboxradio().checkboxradio("refresh");
+
+        /* set click listners after adding new items to listview */
+        shopping.updateListViewListeners();
     },
 
     addItemToList : function(newItem){
