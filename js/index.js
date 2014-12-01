@@ -122,16 +122,26 @@ var shopping = {
         $('a input[type="checkbox"]').on("click",shopping.onItemCompleted);
     },
 
-    onAddNewItem : function(){
+    onAddNewItem : function(event){
+        event.preventDefault();
         var newItem = shopping.getTxtInput();
         shopping.addItemToListView(newItem);
         shopping.addItemToList(newItem);
-        shopping.addItemToLocalStorage();
+        shopping.updateLocalStorage();
         shopping.clearTxtField();
     },
 
-    onRemoveItem : function(){
+    onRemoveItem : function(event){
         console.debug("delete btn is clicked");
+        event.preventDefault();
+
+        var liJQueryObj = $(this).parent();
+        var index = $("li").index(liJQueryObj);
+        console.log("index to be removed is: " + index);
+
+        shopping.removeItemFromListView(liJQueryObj);
+        shopping.removeItemFromList(index);
+        shopping.updateLocalStorage();
     },
 
     onItemCompleted : function(){
@@ -164,6 +174,11 @@ var shopping = {
         shopping.updateListViewListeners();
     },
 
+    removeItemFromListView : function(liJqueryObj){
+        $(liJqueryObj).remove();
+        $('#'+this.listViewId).listview("refresh");
+    },
+
     addItemToList : function(newItem){
         /* Make sure that the item is not saved before */
         if(-1 === shopping.listOfGroceries.indexOf(newItem)){
@@ -175,7 +190,12 @@ var shopping = {
         console.debug(shopping.listOfGroceries);
     },
 
-    addItemToLocalStorage : function(){
+    removeItemFromList : function(index){
+        shopping.listOfGroceries.splice(index, 1);
+        console.debug(shopping.listOfGroceries);
+    },
+
+    updateLocalStorage : function(){
         localStorage.setItem(this.localStorageKey, JSON.stringify(this.listOfGroceries));
     },
 
