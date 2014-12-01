@@ -89,33 +89,36 @@ var shopping = {
         /* set click listener for add button. */
         $("#new-item-btn").on("click", this.onAddNewItem);
 
-        /* set click listener for remove/done buttons in case list of groceries is not empty. Need to set same listeners for
-            dynamically created items inside addItemToListView method. */
-        $(document).on("listviewcreate", this.onListViewCreate);
 
+        /* pass the list by reference not by value to keep changes outside the function body afterwards. */
+        this.listViewCreate("listOfGroceries", this.localStorageKey, this.listViewId);
+    },
+
+    listViewCreate : function(listKey, key ,listViewId ){
+        console.log("listViewCreate with id: "+listViewId);
         /* Get list of grocery items that are saved in local storage (if any) then create listview. */
-        this.listOfGroceries = this.getItemsFromLocalStorage();
-        if(null !== this.listOfGroceries){
-//            console.log("key has value. Create listview");
-            var unorderedListHTML_Tag = this.listOfGroceries.toUnorderedList(this.listViewId);
+        shopping[listKey] = this.getItemsFromLocalStorage(key);
+        if(null !== shopping[listKey] && 0 !== shopping[listKey].length){
+            console.log("local storage key has valid value");
+            console.log(shopping[listKey].length);
+            var unorderedListHTML_Tag = shopping[listKey].toUnorderedList(listViewId);
         }else{
-//            console.debug("key has no value");
+            console.debug("local storage key has empty value");
             /*Reset list to empty array instead of null. */
-            this.listOfGroceries = [];
+            shopping[listKey] = [];
 
             /* create listview tag before adding any new items from the user. */
-            var unorderedListHTML_Tag = utilities.getUlHtmlTag(this.listViewId) +
+            var unorderedListHTML_Tag = utilities.getUlHtmlTag(listViewId) +
                                         utilities.getUlClosingTag();
         }
 
         $(".ui-content").append(unorderedListHTML_Tag);
-    },
+        $("#"+listViewId).listview().listview("refresh");
 
-    onListViewCreate : function(event, ui){
-//        console.log("list view is created");
-        /* upon creation of listview, set click listener for the delete button and checkbox */
-        var removeBtnSelectors = "#"+shopping.listViewId + " li a.ui-icon-delete";
-        var checkBoxSelectors = "#"+shopping.listViewId + ' a input[type="checkbox"]';
+        /* set click listeners for remove button and checkbox after creating listview. */
+        var removeBtnSelectors = "#"+listViewId + " li a.ui-icon-delete";
+        var checkBoxSelectors = "#"+listViewId + ' li a input[type="checkbox"]';
+
         shopping.updateListViewListeners(removeBtnSelectors , checkBoxSelectors);
     },
 
@@ -127,31 +130,48 @@ var shopping = {
     onAddNewItem : function(event){
         event.preventDefault();
         var newItem = shopping.getTxtInput();
-        shopping.addItemToListView(newItem);
-        shopping.addItemToList(newItem);
-        shopping.updateLocalStorage();
+        shopping.addItemToListView (shopping.listViewId      , newItem);
+        shopping.addItemToList     (shopping.listOfGroceries , newItem);
+        shopping.updateLocalStorage(shopping.localStorageKey, shopping.listOfGroceries);
         shopping.clearTxtField();
     },
 
     onRemoveItem : function(event){
-        console.debug("delete btn is clicked");
         event.preventDefault();
-
+        console.debug("delete btn is clicked");
         var liJQueryObj = $(this).parent();
         var index = $("li").index(liJQueryObj);
         console.debug("index to be removed is: " + index);
 
-        shopping.removeItemFromListView(liJQueryObj);
-        shopping.removeItemFromList(index);
-        shopping.updateLocalStorage();
+        /* Determine which listview is pressed and accordingly which list that would be processed.*/
+        var pairs = shopping.getListViewId_ListPairs(index);
+
+        /* Remove item from listview, list and local storage. */
+        shopping.removeItemFromListView(pairs["listViewId"], liJQueryObj);
+        shopping.removeItemFromList(pairs["list"], index);
+        shopping.updateLocalStorage(pairs["key"], pairs["list"]);
     },
 
-    onItemCompleted : function(){
+    onItemCompleted : function(event){
         console.log("Check box is clicked");
         var checkboxJQueryObj = $(this);
-        var index = $("#"+shopping.listViewId + "  :checkbox").index(checkboxJQueryObj);
+        var index = $(":checkbox").index(checkboxJQueryObj);
         console.debug("index checked is: "+ index);
-        shopping.removeItemFromListView(index);
+
+        /* Determine which listview is pressed and accordingly which list that would be processed.*/
+        var pairs = shopping.getListViewId_ListPairs(index);
+
+        shopping.removeItemFromListView(pairs["listViewId"], index);
+        shopping.removeItemFromList(pairs["list"], index);
+    },
+
+    getListViewId_ListPairs : function(index){
+        if(index < shopping.listOfGroceries.length){
+            return {"listViewId":shopping.listViewId , "list":shopping.listOfGroceries, "key":shopping.localStorageKey};
+        }else{
+            /*TODO: set listview id and list for picked items*/
+            return null;
+        }
     },
 
     getTxtInput : function(){
@@ -162,7 +182,7 @@ var shopping = {
         $("#item").val("");
     },
 
-    addItemToListView : function(newItem){
+    addItemToListView : function(listViewId, newItem){
         var newItemLiTag = utilities.getLiHtmlTag(newItem);
         /* If you manipulate a listview via JavaScript (e.g. add new LI elements), you must call the refresh method on it to update the
             visual styling. But I found that the checkbox input misses some jquery-mobile classes so trigger listview creation event
@@ -173,22 +193,22 @@ var shopping = {
 
         /* For some reason, when I programtically trigger the event of listview creation, it did not invoke onListViewCreate!!*/
 //        $('#'+this.listViewId).append(newItemLiTag).listview("refresh").trigger("create");
-        $('#'+this.listViewId).append(newItemLiTag).listview("refresh");
+        $('#'+listViewId).append(newItemLiTag).listview("refresh");
         $('input[type="checkbox"]').checkboxradio().checkboxradio("refresh");
 
         /* set click listners after adding new items to the endo of listview.
         Note that it is mandatory to select last child only otherwise click handler would be registered multiple times for the same
         button which leads to unexpected results.*/
-        var removeBtnSelector = "#"+this.listViewId + " li:last a.ui-icon-delete";
-        var checkBoxSelector = "#"+this.listViewId + ' li:last a input[type="checkbox"]';
+        var removeBtnSelector = "#"+listViewId + " li:last a.ui-icon-delete";
+        var checkBoxSelector = "#"+listViewId + ' li:last a input[type="checkbox"]';
         shopping.updateListViewListeners(removeBtnSelector, checkBoxSelector);
     },
 
-    removeItemFromListView : function(indexOrObj){
+    removeItemFromListView : function(listViewId, indexOrObj){
 
         if( "number" === typeof indexOrObj){
-            var liJqueryObj = $("#"+shopping.listViewId + " li").get(indexOrObj);
-            var checkboxJQueryObj = $("#"+shopping.listViewId + " :checkbox").get(indexOrObj);
+            var liJqueryObj = $("#"+listViewId + " li").get(indexOrObj);
+            var checkboxJQueryObj = $("#"+listViewId + " :checkbox").get(indexOrObj);
         }else{
             var liJqueryObj = indexOrObj;
         }
@@ -200,13 +220,13 @@ var shopping = {
             $(checkboxJQueryObj).checkboxradio().checkboxradio("refresh");
 
         /* refresh listview after removing any item. */
-        $('#'+this.listViewId).listview("refresh");
+        $('#'+listViewId).listview("refresh");
     },
 
-    addItemToList : function(newItem){
+    addItemToList : function(list, newItem){
         /* Make sure that the item is not saved before */
-        if(-1 === shopping.listOfGroceries.indexOf(newItem)){
-            shopping.listOfGroceries.push(newItem);
+        if(-1 === list.indexOf(newItem)){
+            list.push(newItem);
         }else{
             console.warn("Display popup to the user about duplicate value");
             /*TODO: dispaly warning dialog/popup to the user about the duplicated value. */
@@ -214,18 +234,18 @@ var shopping = {
 //        console.debug(shopping.listOfGroceries);
     },
 
-    removeItemFromList : function(index){
+    removeItemFromList : function(list,index){
         var NUM_OF_ELEMENTS = 1; // number of elements to be removed from array.
-        shopping.listOfGroceries.splice(index, NUM_OF_ELEMENTS);
+        list.splice(index, NUM_OF_ELEMENTS);
 //        console.debug(shopping.listOfGroceries);
     },
 
-    updateLocalStorage : function(){
-        localStorage.setItem(this.localStorageKey, JSON.stringify(this.listOfGroceries));
+    updateLocalStorage : function(key,list){
+        localStorage.setItem(key, JSON.stringify(list));
     },
 
-    getItemsFromLocalStorage : function(){
-        return JSON.parse(localStorage.getItem(this.localStorageKey));
+    getItemsFromLocalStorage : function(key){
+        return JSON.parse(localStorage.getItem(key));
     }
 };
 
