@@ -54,6 +54,10 @@ var shopping = {
     listOfGroceries : [],
     listViewId      : "shoppingListView",
 
+    pickedItemsLocalStorageKey : "picked-grocery-show0017",
+    listOfPickedItems : [],
+    pickedItemsListViewId : "pickedItemsListView",
+
     // Application Constructor
     initialize: function() {
         this.bindEvents();
@@ -89,30 +93,37 @@ var shopping = {
         /* set click listener for add button. */
         $("#new-item-btn").on("click", this.onAddNewItem);
 
-
         /* pass the list by reference not by value to keep changes outside the function body afterwards. */
-        this.listViewCreate("listOfGroceries", this.localStorageKey, this.listViewId);
+        this.listViewCreate("listOfGroceries", this.localStorageKey, this.listViewId, '<div class="items-to-buy"><h4>List of items to buy</h4>');
+        this.listViewCreate("listOfPickedItems", this.pickedItemsLocalStorageKey, this.pickedItemsListViewId, '<div class="picked-items"><h4>List of picked items</h4>');
+
+    $('.container').width("100%").height("500").split({
+        orientation: 'horizontal',
+        limit: 10,
+        position: '50%'
+    });
+
     },
 
-    listViewCreate : function(listKey, key ,listViewId ){
+    listViewCreate : function(listKey, key ,listViewId, listViewTitle ){
         console.log("listViewCreate with id: "+listViewId);
         /* Get list of grocery items that are saved in local storage (if any) then create listview. */
         shopping[listKey] = this.getItemsFromLocalStorage(key);
         if(null !== shopping[listKey] && 0 !== shopping[listKey].length){
             console.log("local storage key has valid value");
             console.log(shopping[listKey].length);
-            var unorderedListHTML_Tag = shopping[listKey].toUnorderedList(listViewId);
+            var listViewHtmlTag = listViewTitle + shopping[listKey].toUnorderedList(listViewId);
         }else{
             console.debug("local storage key has empty value");
             /*Reset list to empty array instead of null. */
             shopping[listKey] = [];
 
             /* create listview tag before adding any new items from the user. */
-            var unorderedListHTML_Tag = utilities.getUlHtmlTag(listViewId) +
-                                        utilities.getUlClosingTag();
+            var listViewHtmlTag = listViewTitle + utilities.getUlHtmlTag(listViewId) +
+                                        utilities.getUlClosingTag() + '</div>';
         }
 
-        $(".ui-content").append(unorderedListHTML_Tag);
+        $(".container").append(listViewHtmlTag);
         $("#"+listViewId).listview().listview("refresh");
 
         /* set click listeners for remove button and checkbox after creating listview. */
@@ -196,8 +207,7 @@ var shopping = {
         $('#'+listViewId).append(newItemLiTag).listview("refresh");
         $('input[type="checkbox"]').checkboxradio().checkboxradio("refresh");
 
-        /* set click listners after adding new items to the endo of listview.
-        Note that it is mandatory to select last child only otherwise click handler would be registered multiple times for the same
+        /*Note that it is mandatory to select last child only otherwise click handler would be registered multiple times for the same
         button which leads to unexpected results.*/
         var removeBtnSelector = "#"+listViewId + " li:last a.ui-icon-delete";
         var checkBoxSelector = "#"+listViewId + ' li:last a input[type="checkbox"]';
@@ -250,3 +260,12 @@ var shopping = {
 };
 
 shopping.initialize();
+//$(document).ready(function(){
+//
+//    $('#container').width(700).height(400).split({
+//        orientation: 'horizontal',
+//        limit: 10
+//
+//    });
+//});
+
