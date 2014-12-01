@@ -172,16 +172,33 @@ var shopping = {
         /* Determine which listview is pressed and accordingly which list that would be processed.*/
         var pairs = shopping.getListViewId_ListPairs(index);
 
-        shopping.removeItemFromListView(pairs["listViewId"], index);
+        /* Upon clicking on checkbox remove it from current listview and add it to the other listview. */
+        var removedItemText = shopping.removeItemFromListView(pairs["listViewId"], index);
         shopping.removeItemFromList(pairs["list"], index);
+        shopping.updateLocalStorage(pairs["key"], pairs["list"]);
+
+        shopping.addItemToListView( pairs["listViewId2"], removedItemText);
+        shopping.addItemToList    ( pairs["list2"], removedItemText);
+        shopping.updateLocalStorage(pairs["key2"], pairs["list2"]);
     },
 
     getListViewId_ListPairs : function(index){
         if(index < shopping.listOfGroceries.length){
-            return {"listViewId":shopping.listViewId , "list":shopping.listOfGroceries, "key":shopping.localStorageKey};
+            return {"listViewId"  :shopping.listViewId ,
+                    "list"        :shopping.listOfGroceries,
+                    "key"         :shopping.localStorageKey,
+                    "listViewId2" :shopping.pickedItemsListViewId ,
+                    "list2"       :shopping.listOfPickedItems,
+                    "key2"        :shopping.pickedItemsLocalStorageKey
+                   };
         }else{
-            /*TODO: set listview id and list for picked items*/
-            return null;
+            return {"listViewId":shopping.pickedItemsListViewId ,
+                    "list":shopping.listOfPickedItems,
+                    "key":shopping.pickedItemsLocalStorageKey,
+                    "listViewId2" :shopping.listViewId ,
+                    "list2"       :shopping.listOfGroceries,
+                    "key2"        :shopping.localStorageKey
+                   };
         }
     },
 
@@ -205,7 +222,7 @@ var shopping = {
         /* For some reason, when I programtically trigger the event of listview creation, it did not invoke onListViewCreate!!*/
 //        $('#'+this.listViewId).append(newItemLiTag).listview("refresh").trigger("create");
         $('#'+listViewId).append(newItemLiTag).listview("refresh");
-        $('input[type="checkbox"]').checkboxradio().checkboxradio("refresh");
+        $('#'+listViewId+' input[type="checkbox"]').checkboxradio().checkboxradio("refresh");
 
         /*Note that it is mandatory to select last child only otherwise click handler would be registered multiple times for the same
         button which leads to unexpected results.*/
@@ -217,6 +234,7 @@ var shopping = {
     removeItemFromListView : function(listViewId, indexOrObj){
 
         if( "number" === typeof indexOrObj){
+            /*TODO: rename this variable as this is not JQuery object but it is DOM object. */
             var liJqueryObj = $("#"+listViewId + " li").get(indexOrObj);
             var checkboxJQueryObj = $("#"+listViewId + " :checkbox").get(indexOrObj);
         }else{
@@ -231,6 +249,9 @@ var shopping = {
 
         /* refresh listview after removing any item. */
         $('#'+listViewId).listview("refresh");
+
+        /* return text value of removed element. */
+        return $(liJqueryObj).find("label").text();
     },
 
     addItemToList : function(list, newItem){
@@ -260,12 +281,3 @@ var shopping = {
 };
 
 shopping.initialize();
-//$(document).ready(function(){
-//
-//    $('#container').width(700).height(400).split({
-//        orientation: 'horizontal',
-//        limit: 10
-//
-//    });
-//});
-
