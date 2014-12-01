@@ -36,7 +36,7 @@ var utilities = {
 /* this method is used to convert all array elements into unordered list HTML tag where list items are represented by array elements.
 Note that this method have been added to the Array object in JS so that any array can inherit this method and use it properly. */
 Array.prototype.toUnorderedList = function(listViewId){
-    console.log("toUnorderedList is called");
+//    console.log("toUnorderedList is called");
 
     var unorderedListTag = utilities.getUlHtmlTag(listViewId);
     for (var i=0; i<this.length; i++){
@@ -96,10 +96,10 @@ var shopping = {
         /* Get list of grocery items that are saved in local storage (if any) then create listview. */
         this.listOfGroceries = this.getItemsFromLocalStorage();
         if(null !== this.listOfGroceries){
-            console.log("key has value. Create listview");
+//            console.log("key has value. Create listview");
             var unorderedListHTML_Tag = this.listOfGroceries.toUnorderedList(this.listViewId);
         }else{
-            console.debug("key has no value");
+//            console.debug("key has no value");
             /*Reset list to empty array instead of null. */
             this.listOfGroceries = [];
 
@@ -112,7 +112,7 @@ var shopping = {
     },
 
     onListViewCreate : function(event, ui){
-        console.log("list view is created");
+//        console.log("list view is created");
         /* upon creation of listview, set click listener for the delete button and checkbox */
         shopping.updateListViewListeners();
     },
@@ -137,7 +137,7 @@ var shopping = {
 
         var liJQueryObj = $(this).parent();
         var index = $("li").index(liJQueryObj);
-        console.log("index to be removed is: " + index);
+        console.debug("index to be removed is: " + index);
 
         shopping.removeItemFromListView(liJQueryObj);
         shopping.removeItemFromList(index);
@@ -187,12 +187,13 @@ var shopping = {
             console.warn("Display popup to the user about duplicate value");
             /*TODO: dispaly warning dialog/popup to the user about the duplicated value. */
         }
-        console.debug(shopping.listOfGroceries);
+//        console.debug(shopping.listOfGroceries);
     },
 
     removeItemFromList : function(index){
-        shopping.listOfGroceries.splice(index, 1);
-        console.debug(shopping.listOfGroceries);
+        var NUM_OF_ELEMENTS = 1; // number of elements to be removed from array.
+        shopping.listOfGroceries.splice(index, NUM_OF_ELEMENTS);
+//        console.debug(shopping.listOfGroceries);
     },
 
     updateLocalStorage : function(){
