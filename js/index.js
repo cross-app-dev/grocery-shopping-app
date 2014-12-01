@@ -114,12 +114,14 @@ var shopping = {
     onListViewCreate : function(event, ui){
 //        console.log("list view is created");
         /* upon creation of listview, set click listener for the delete button and checkbox */
-        shopping.updateListViewListeners();
+        var removeBtnSelectors = "#"+shopping.listViewId + " li a.ui-icon-delete";
+        var checkBoxSelectors = "#"+shopping.listViewId + ' a input[type="checkbox"]';
+        shopping.updateListViewListeners(removeBtnSelectors , checkBoxSelectors);
     },
 
-    updateListViewListeners : function(){
-        $("li a.ui-icon-delete").on("click", shopping.onRemoveItem);
-        $('a input[type="checkbox"]').on("click",shopping.onItemCompleted);
+    updateListViewListeners : function(selectorRemove, selectorCheckBox){
+        $(selectorRemove).on("click", shopping.onRemoveItem);
+        $(selectorCheckBox).on("click",shopping.onItemCompleted);
     },
 
     onAddNewItem : function(event){
@@ -170,8 +172,12 @@ var shopping = {
         $('#'+this.listViewId).append(newItemLiTag).listview("refresh");
         $('input[type="checkbox"]').checkboxradio().checkboxradio("refresh");
 
-        /* set click listners after adding new items to listview */
-        shopping.updateListViewListeners();
+        /* set click listners after adding new items to the endo of listview.
+        Note that it is mandatory to select last child only otherwise click handler would be registered multiple times for the same
+        button which leads to unexpected results.*/
+        var removeBtnSelector = "#"+this.listViewId + " li:last a.ui-icon-delete";
+        var checkBoxSelector = "#"+this.listViewId + ' a:last input[type="checkbox"]';
+        shopping.updateListViewListeners(removeBtnSelector, checkBoxSelector);
     },
 
     removeItemFromListView : function(liJqueryObj){
