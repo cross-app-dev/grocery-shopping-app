@@ -148,6 +148,10 @@ var shopping = {
 
     onItemCompleted : function(){
         console.log("Check box is clicked");
+        var checkboxJQueryObj = $(this);
+        var index = $("#"+shopping.listViewId + "  :checkbox").index(checkboxJQueryObj);
+        console.debug("index checked is: "+ index);
+        shopping.removeItemFromListView(index,checkboxJQueryObj);
     },
 
     getTxtInput : function(){
@@ -176,12 +180,20 @@ var shopping = {
         Note that it is mandatory to select last child only otherwise click handler would be registered multiple times for the same
         button which leads to unexpected results.*/
         var removeBtnSelector = "#"+this.listViewId + " li:last a.ui-icon-delete";
-        var checkBoxSelector = "#"+this.listViewId + ' a:last input[type="checkbox"]';
+        var checkBoxSelector = "#"+this.listViewId + ' li:last a input[type="checkbox"]';
         shopping.updateListViewListeners(removeBtnSelector, checkBoxSelector);
     },
 
-    removeItemFromListView : function(liJqueryObj){
+    removeItemFromListView : function(indexOrObj, checkboxJQueryObj){
+
+        if( "number" === typeof indexOrObj){
+            var liJqueryObj = $("#"+shopping.listViewId + " li").get(indexOrObj);
+        }else{
+            var liJqueryObj = indexOrObj;
+        }
+
         $(liJqueryObj).remove();
+        checkboxJQueryObj.checkboxradio().checkboxradio("refresh");
         $('#'+this.listViewId).listview("refresh");
     },
 
