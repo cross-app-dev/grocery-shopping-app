@@ -151,7 +151,7 @@ var shopping = {
         var checkboxJQueryObj = $(this);
         var index = $("#"+shopping.listViewId + "  :checkbox").index(checkboxJQueryObj);
         console.debug("index checked is: "+ index);
-        shopping.removeItemFromListView(index,checkboxJQueryObj);
+        shopping.removeItemFromListView(index);
     },
 
     getTxtInput : function(){
@@ -184,16 +184,22 @@ var shopping = {
         shopping.updateListViewListeners(removeBtnSelector, checkBoxSelector);
     },
 
-    removeItemFromListView : function(indexOrObj, checkboxJQueryObj){
+    removeItemFromListView : function(indexOrObj){
 
         if( "number" === typeof indexOrObj){
             var liJqueryObj = $("#"+shopping.listViewId + " li").get(indexOrObj);
+            var checkboxJQueryObj = $("#"+shopping.listViewId + " :checkbox").get(indexOrObj);
         }else{
             var liJqueryObj = indexOrObj;
         }
 
         $(liJqueryObj).remove();
-        checkboxJQueryObj.checkboxradio().checkboxradio("refresh");
+
+        /*refresh checkbox if list item is removed due to shopping item completed. */
+        if (checkboxJQueryObj)
+            $(checkboxJQueryObj).checkboxradio().checkboxradio("refresh");
+
+        /* refresh listview after removing any item. */
         $('#'+this.listViewId).listview("refresh");
     },
 
