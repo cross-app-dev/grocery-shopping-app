@@ -42,11 +42,13 @@ var utilities = {
 /* this method is used to convert all array elements into unordered list HTML tag where list items are represented by array elements.
 Note that this method have been added to the Array object in JS so that any array can inherit this method and use it properly. */
 Array.prototype.toUnorderedList = function(listViewId){
-//    console.log("toUnorderedList is called");
+
+    /* label for every checkbox must be decorated by line-through in case of creating listview for picked items*/
+    var labelStyleClass = (listViewId === shopping.pickedItemsListViewId)?'picked-item':null;
 
     var unorderedListTag = utilities.getUlHtmlTag(listViewId);
     for (var i=0; i<this.length; i++){
-        unorderedListTag += utilities.getLiHtmlTag(this[i]);
+        unorderedListTag += utilities.getLiHtmlTag(this[i], labelStyleClass);
     }
     unorderedListTag += utilities.getUlClosingTag();
 
@@ -148,6 +150,13 @@ var shopping = {
         var checkBoxSelectors = "#"+listViewId + ' li a input[type="checkbox"]';
 
         shopping.updateListViewListeners(removeBtnSelectors , checkBoxSelectors);
+
+        /* in case list of picked items is created and there are some items in local storage, make sure to mark all checkboxes*/
+        if(("listOfPickedItems" === listKey) && (0 < shopping[listKey].length)){
+            $("#"+listViewId+" :checkbox").prop('checked','true');
+            $("#"+listViewId+" :checkbox").checkboxradio().checkboxradio("refresh");
+        }
+
     },
 
     /* This method is used to set click listeners for every remove button as well as checkbox in the given listview.
