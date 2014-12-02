@@ -151,14 +151,16 @@ var shopping = {
         event.preventDefault();
         console.debug("delete btn is clicked");
         var liJQueryObj = $(this).parent();
-        var index = $("li").index(liJQueryObj);
+        var currentListViewId = $(this).parents('.ui-listview').attr('id');
+        console.debug("currentListViewId: " + currentListViewId);
+        var index = $("#"+currentListViewId+" li").index(liJQueryObj);
         console.debug("index to be removed is: " + index);
 
         /* Determine which listview is pressed and accordingly which list that would be processed.*/
-        var pairs = shopping.getListViewId_ListPairs(index);
+        var pairs = shopping.getListViewId_ListPairs(currentListViewId);
 
         /* Remove item from listview, list and local storage. */
-        shopping.removeItemFromListView(pairs["listViewId"], liJQueryObj);
+        shopping.removeItemFromListView(pairs["listViewId"], index);
         shopping.removeItemFromList(pairs["list"], index);
         shopping.updateLocalStorage(pairs["key"], pairs["list"]);
     },
@@ -166,15 +168,19 @@ var shopping = {
     onItemCompleted : function(event){
         console.log("Check box is clicked");
         var checkboxJQueryObj = $(this);
-        var index = $(":checkbox").index(checkboxJQueryObj);
+        var currentListViewId = $(this).parents('.ui-listview').attr('id');
+        console.debug("currentListViewId :" + currentListViewId);
+        var index = $('#' + currentListViewId + " :checkbox").index(checkboxJQueryObj);
         console.debug("index checked is: "+ index);
 
         /* Determine which listview is pressed and accordingly which list that would be processed.*/
-        var pairs = shopping.getListViewId_ListPairs(index);
+        var pairs = shopping.getListViewId_ListPairs(currentListViewId);
 
         /* Upon clicking on checkbox remove it from current listview and add it to the other listview. */
         var removedItemText = shopping.removeItemFromListView(pairs["listViewId"], index);
+        console.debug(removedItemText);
         shopping.removeItemFromList(pairs["list"], index);
+        console.debug(pairs["list"]);
         shopping.updateLocalStorage(pairs["key"], pairs["list"]);
 
         shopping.addItemToListView( pairs["listViewId2"], removedItemText);
@@ -182,8 +188,8 @@ var shopping = {
         shopping.updateLocalStorage(pairs["key2"], pairs["list2"]);
     },
 
-    getListViewId_ListPairs : function(index){
-        if(index < shopping.listOfGroceries.length){
+    getListViewId_ListPairs : function(currentListViewId){
+        if( shopping.listViewId === currentListViewId ){
             return {"listViewId"  :shopping.listViewId ,
                     "list"        :shopping.listOfGroceries,
                     "key"         :shopping.localStorageKey,
@@ -192,9 +198,9 @@ var shopping = {
                     "key2"        :shopping.pickedItemsLocalStorageKey
                    };
         }else{
-            return {"listViewId":shopping.pickedItemsListViewId ,
-                    "list":shopping.listOfPickedItems,
-                    "key":shopping.pickedItemsLocalStorageKey,
+            return {"listViewId"  :shopping.pickedItemsListViewId ,
+                    "list"        :shopping.listOfPickedItems,
+                    "key"         :shopping.pickedItemsLocalStorageKey,
                     "listViewId2" :shopping.listViewId ,
                     "list2"       :shopping.listOfGroceries,
                     "key2"        :shopping.localStorageKey
