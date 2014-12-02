@@ -22,9 +22,15 @@ var utilities = {
         return ulHtmlTag;
     },
 
-    getLiHtmlTag : function(liId){
+    getLiHtmlTag : function(liId, labelStyleClass){
+        if(labelStyleClass){
+            var labelHtmlTag = '<label class="custom-checkbox '+ labelStyleClass+ '" for="';
+        }else{
+            var labelHtmlTag = '<label class="custom-checkbox" for="';
+        }
+
         return '<li><a href="#" class="no-offsets"><input type="checkbox" id="' +  liId+ '" name="' + liId +
-                            '"><label class="custom-checkbox" for="'+ liId+ '">' + liId +
+                            '">'+ labelHtmlTag + liId+ '">' + liId +
                             '</label></input></a><a href="#"></a></li>';
     },
 
@@ -197,6 +203,8 @@ var shopping = {
     },
 
     onItemCompleted : function(event){
+        event.preventDefault();
+
         var $checkboxObj = $(this);
 
         /* Determine the listview from whcih the item would be removed. */
@@ -218,7 +226,7 @@ var shopping = {
         shopping.updateLocalStorage(pairs["key"], pairs["list"]);
 
         /* Note that this method (addItemToListView) is used when user clicks add button. This is useful for code reusability.*/
-        shopping.addItemToListView( pairs["listViewId2"], removedItemText);
+        shopping.addItemToListView( pairs["listViewId2"], removedItemText,pairs["style"]);
         shopping.addItemToList    ( pairs["list2"], removedItemText);
         shopping.updateLocalStorage(pairs["key2"], pairs["list2"]);
     },
@@ -232,7 +240,8 @@ var shopping = {
                     "key"         :shopping.localStorageKey,
                     "listViewId2" :shopping.pickedItemsListViewId ,
                     "list2"       :shopping.listOfPickedItems,
-                    "key2"        :shopping.pickedItemsLocalStorageKey
+                    "key2"        :shopping.pickedItemsLocalStorageKey,
+                    "style"       :"picked-item"
                    };
         }else{
             return {"listViewId"  :shopping.pickedItemsListViewId ,
@@ -240,7 +249,8 @@ var shopping = {
                     "key"         :shopping.pickedItemsLocalStorageKey,
                     "listViewId2" :shopping.listViewId ,
                     "list2"       :shopping.listOfGroceries,
-                    "key2"        :shopping.localStorageKey
+                    "key2"        :shopping.localStorageKey,
+                    "style"       :null
                    };
         }
     },
@@ -253,8 +263,8 @@ var shopping = {
         $("#item").val("");
     },
 
-    addItemToListView : function(listViewId, newItem){
-        var newItemLiTag = utilities.getLiHtmlTag(newItem);
+    addItemToListView : function(listViewId, newItem, itemStyleClass){
+        var newItemLiTag = utilities.getLiHtmlTag(newItem,itemStyleClass);
         /* If you manipulate a listview via JavaScript (e.g. add new LI elements), you must call the refresh method on it to update the
             visual styling. But I found that the checkbox input misses some jquery-mobile classes so trigger listview creation event
             to load listview again and apply these missing classes.
@@ -272,6 +282,11 @@ var shopping = {
         var removeBtnSelector = "#"+listViewId + " li:last a.ui-icon-delete";
         var checkBoxSelector = "#"+listViewId + ' li:last a input[type="checkbox"]';
         shopping.updateListViewListeners(removeBtnSelector, checkBoxSelector);
+
+        if(itemStyleClass){
+            $(checkBoxSelector).prop('checked','true');
+            $(checkBoxSelector).checkboxradio().checkboxradio("refresh");
+        }
     },
 
     removeItemFromListView : function(listViewId, index){
