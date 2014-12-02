@@ -93,25 +93,34 @@ var shopping = {
         /* set click listener for add button. */
         $("#new-item-btn").on("click", this.onAddNewItem);
 
+        var listViewGroceriesTitle = '<div class="items-to-buy"><h4>List of items to buy</h4>';
         /* pass the list by reference not by value to keep changes outside the function body afterwards. */
-        this.listViewCreate("listOfGroceries", this.localStorageKey, this.listViewId, '<div class="items-to-buy"><h4>List of items to buy</h4>');
-        this.listViewCreate("listOfPickedItems", this.pickedItemsLocalStorageKey, this.pickedItemsListViewId, '<div class="picked-items"><h4>List of picked items</h4>');
+        this.listViewCreate("listOfGroceries",
+                            this.localStorageKey,
+                            this.listViewId,
+                            listViewGroceriesTitle);
 
-    $('.container').width("100%").height("500").split({
-        orientation: 'horizontal',
-        limit: 10,
-        position: '50%'
-    });
+        var listViewPickedItemsTitle = '<div class="picked-items"><h4>List of picked items</h4>';
+        this.listViewCreate("listOfPickedItems",
+                            this.pickedItemsLocalStorageKey,
+                            this.pickedItemsListViewId,
+                            listViewPickedItemsTitle);
+
+        /* Add dynamic spiltter between two listviews. */
+        $('.container').width("100%").height("500").split({
+            orientation: 'horizontal',
+            limit: 10,
+            position: '50%'
+        });
 
     },
 
     listViewCreate : function(listKey, key ,listViewId, listViewTitle ){
         console.log("listViewCreate with id: "+listViewId);
-        /* Get list of grocery items that are saved in local storage (if any) then create listview. */
+        /* Get list of grocery/picked items that are saved in local storage (if any). */
         shopping[listKey] = this.getItemsFromLocalStorage(key);
-        if(null !== shopping[listKey] && 0 !== shopping[listKey].length){
+        if(null !== shopping[listKey]){
             console.log("local storage key has valid value");
-            console.log(shopping[listKey].length);
             var listViewHtmlTag = listViewTitle + shopping[listKey].toUnorderedList(listViewId);
         }else{
             console.debug("local storage key has empty value");
@@ -120,7 +129,9 @@ var shopping = {
 
             /* create listview tag before adding any new items from the user. */
             var listViewHtmlTag = listViewTitle + utilities.getUlHtmlTag(listViewId) +
-                                        utilities.getUlClosingTag() + '</div>';
+                                    utilities.getUlClosingTag() +
+                                    '</div>'; /*closing tag for div that contains title and listview itself. This is required for
+                                                 splitting the two listviews.*/
         }
 
         $(".container").append(listViewHtmlTag);
@@ -133,11 +144,21 @@ var shopping = {
         shopping.updateListViewListeners(removeBtnSelectors , checkBoxSelectors);
     },
 
+    /* This method is used to set click listeners for every remove button as well as checkbox in the given listview.
+       Note that the method 'on' is used which means that you must make sure to register these listeners only once otherwise
+       handlers might be registered multiple times, hence such handlers might be executed multiple times per one click and cause
+       unexpected behavior. */
     updateListViewListeners : function(selectorRemove, selectorCheckBox){
         $(selectorRemove).on("click", shopping.onRemoveItem);
         $(selectorCheckBox).on("click",shopping.onItemCompleted);
     },
 
+    /* This method is invoked when the user clicks on add button in the footer. Actions steps are summarized as:
+        1- Read new item that users enters through text field.
+        2- Add new item to listview of items to buy.
+        3- Add new item to list of items to buy.
+        4- Update local storage with the new item.
+        5- Finally, clear input field to indicate that user can enter extra items again. */
     onAddNewItem : function(event){
         event.preventDefault();
         var newItem = shopping.getTxtInput();
@@ -147,13 +168,23 @@ var shopping = {
         shopping.clearTxtField();
     },
 
+    /* This method is invoked when the user clicks on remove button in given list view. Actions steps are summarized by:
+        1- Remove selected item from corresponding list view.
+        2- Remove selected item from corresponding list.
+        3- Remove selected item from local storage.*/
     onRemoveItem : function(event){
         event.preventDefault();
-        console.debug("delete btn is clicked");
-        var liJQueryObj = $(this).parent();
+
+        /* According to JQuery mobile structure, the parent node of remove button is list item that represents the entry of list
+            view. This is the entry that would be removed.*/
+        var $liObj = $(this).parent();
+
+        /* Determine the listview from whcih the item would be removed. */
         var currentListViewId = $(this).parents('.ui-listview').attr('id');
-        console.debug("currentListViewId: " + currentListViewId);
-        var index = $("#"+currentListViewId+" li").index(liJQueryObj);
+
+        /* Get index for the item that would be removed, this would be the same index in either listview or list.
+            This would handles the corner case if user enters same item more than once. */
+        var index = $("#"+currentListViewId+" li").index($liObj);
         console.debug("index to be removed is: " + index);
 
         /* Determine which listview is pressed and accordingly which list that would be processed.*/
@@ -166,28 +197,34 @@ var shopping = {
     },
 
     onItemCompleted : function(event){
-        console.log("Check box is clicked");
-        var checkboxJQueryObj = $(this);
+        var $checkboxObj = $(this);
+
+        /* Determine the listview from whcih the item would be removed. */
         var currentListViewId = $(this).parents('.ui-listview').attr('id');
-        console.debug("currentListViewId :" + currentListViewId);
-        var index = $('#' + currentListViewId + " :checkbox").index(checkboxJQueryObj);
+
+        /* Get index for the item that would be removed, this would be the same index in either listview or list.
+            This would handles the corner case if user enters same item more than once. */
+        var index = $('#' + currentListViewId + " :checkbox").index($checkboxObj);
         console.debug("index checked is: "+ index);
 
         /* Determine which listview is pressed and accordingly which list that would be processed.*/
         var pairs = shopping.getListViewId_ListPairs(currentListViewId);
 
         /* Upon clicking on checkbox remove it from current listview and add it to the other listview. */
+        /* Remove item from listview and obtain its text value to be used in creating new list item tag that will be
+            added to the other listview.*/
         var removedItemText = shopping.removeItemFromListView(pairs["listViewId"], index);
-        console.debug(removedItemText);
         shopping.removeItemFromList(pairs["list"], index);
-        console.debug(pairs["list"]);
         shopping.updateLocalStorage(pairs["key"], pairs["list"]);
 
+        /* Note that this method (addItemToListView) is used when user clicks add button. This is useful for code reusability.*/
         shopping.addItemToListView( pairs["listViewId2"], removedItemText);
         shopping.addItemToList    ( pairs["list2"], removedItemText);
         shopping.updateLocalStorage(pairs["key2"], pairs["list2"]);
     },
 
+    /* This method is used to set which group of list/listview/key that would be used upon swapping an item between the two list
+        views*/
     getListViewId_ListPairs : function(currentListViewId){
         if( shopping.listViewId === currentListViewId ){
             return {"listViewId"  :shopping.listViewId ,
@@ -237,27 +274,21 @@ var shopping = {
         shopping.updateListViewListeners(removeBtnSelector, checkBoxSelector);
     },
 
-    removeItemFromListView : function(listViewId, indexOrObj){
+    removeItemFromListView : function(listViewId, index){
 
-        if( "number" === typeof indexOrObj){
-            /*TODO: rename this variable as this is not JQuery object but it is DOM object. */
-            var liJqueryObj = $("#"+listViewId + " li").get(indexOrObj);
-            var checkboxJQueryObj = $("#"+listViewId + " :checkbox").get(indexOrObj);
-        }else{
-            var liJqueryObj = indexOrObj;
-        }
+        var liDomObj = $("#"+listViewId + " li").get(index);
+        var checkboxDomObj = $("#"+listViewId + " :checkbox").get(index);
 
-        $(liJqueryObj).remove();
+        $(liDomObj).remove();
 
-        /*refresh checkbox if list item is removed due to shopping item completed. */
-        if (checkboxJQueryObj)
-            $(checkboxJQueryObj).checkboxradio().checkboxradio("refresh");
+        /*refresh checkbox if list item is removed from list view due to clicking checkbox. */
+        $(checkboxDomObj).checkboxradio().checkboxradio("refresh");
 
         /* refresh listview after removing any item. */
         $('#'+listViewId).listview("refresh");
 
         /* return text value of removed element. */
-        return $(liJqueryObj).find("label").text();
+        return $(liDomObj).find("label").text();
     },
 
     addItemToList : function(list, newItem){
@@ -268,13 +299,11 @@ var shopping = {
             console.warn("Display popup to the user about duplicate value");
             /*TODO: dispaly warning dialog/popup to the user about the duplicated value. */
         }
-//        console.debug(shopping.listOfGroceries);
     },
 
     removeItemFromList : function(list,index){
         var NUM_OF_ELEMENTS = 1; // number of elements to be removed from array.
         list.splice(index, NUM_OF_ELEMENTS);
-//        console.debug(shopping.listOfGroceries);
     },
 
     updateLocalStorage : function(key,list){
