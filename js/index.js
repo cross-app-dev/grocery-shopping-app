@@ -115,11 +115,11 @@ var shopping = {
                             listViewPickedItemsTitle);
 
         /* Add dynamic spiltter between two listviews. */
-//        $('.container').width("100%").height("500").split({
-//            orientation: 'horizontal',
-//            limit: 10,
-//            position: '50%'
-//        });
+        $('.container').width("100%").height("500").split({
+            orientation: 'horizontal',
+            limit: 10,
+            position: '50%'
+        });
 
     },
 
