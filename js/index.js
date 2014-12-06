@@ -36,6 +36,16 @@ var utilities = {
 
     getUlClosingTag : function(){
         return "</ul>";
+    },
+
+    getContentHeight: function(){
+        var deviceHeight = $(window).height();
+        console.debug("height of my device is: "+ deviceHeight);
+        var headerHeight = $("div[data-role='header']:visible").outerHeight();
+        console.debug("headerHeight = "+ headerHeight);
+        var footerHeight = $("div[data-role='footer']:visible").outerHeight();
+        console.debug("footerHeight = "+ footerHeight);
+        return deviceHeight-footerHeight-headerHeight;
     }
 }
 
@@ -82,8 +92,7 @@ var shopping = {
             document.addEventListener('deviceready', this.onDeviceReady, false);
         } else {
             console.debug("Running application from desktop browser");
-            this.onDeviceReady();
-            //document.addEventListener('DOMContentLoaded', this.onDeviceReady, false);
+            document.addEventListener('DOMContentLoaded', shopping.onDeviceReady, false);
         }
 
     },
@@ -114,8 +123,11 @@ var shopping = {
                             this.pickedItemsListViewId,
                             listViewPickedItemsTitle);
 
-        /* Add dynamic spiltter between two listviews. */
-        $('.container').width("100%").height("500").split({
+        var contentHeight = utilities.getContentHeight();
+
+        /* Add dynamic spiltter between two listviews. By substracting footer height as well as footer height from device height,
+            thus we can get the whole height of the content box at runtime for any device height.*/
+        $('.container').width("100%").height(contentHeight).split({
             orientation: 'horizontal',
             limit: 10,
             position: '50%'
