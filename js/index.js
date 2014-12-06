@@ -17,6 +17,10 @@
  * under the License.
  */
 var utilities = {
+    contentHeight : null,
+    contentWidth : null,
+    contentHeightLandscape : null,
+    contentWidthLandscape  : null,
     getUlHtmlTag : function(listID){
         var ulHtmlTag = '<ul data-role="listview" data-split-icon="delete" id="'+ listID + '">';
         return ulHtmlTag;
@@ -45,7 +49,25 @@ var utilities = {
         console.debug("headerHeight = "+ headerHeight);
         var footerHeight = $("div[data-role='footer']:visible").outerHeight();
         console.debug("footerHeight = "+ footerHeight);
-        return deviceHeight-footerHeight-headerHeight;
+        var padding = parseInt($('.ui-content').css("padding"));
+        console.log("padding is: ", padding);
+        this.contentHeight = deviceHeight-footerHeight-headerHeight - 2*padding;
+    },
+
+    getContentWidth : function(){
+        this.contentWidth = $('.ui-content').width();
+    },
+
+    getContentHeightLandscape: function(){
+        var headerHeight = $("div[data-role='header']:visible").outerHeight();
+        console.debug("headerHeight = "+ headerHeight);
+        var footerHeight = $("div[data-role='footer']:visible").outerHeight();
+        console.debug("footerHeight = "+ footerHeight);
+        this.contentHeightLandscape = $('.ui-content').width() - footerHeight - headerHeight;
+    },
+
+    getContentWidthtLandscape : function(){
+        this.contentWidthLandscape = $(window).height();
     }
 }
 
@@ -75,7 +97,7 @@ var shopping = {
     pickedItemsLocalStorageKey : "picked-grocery-show0017",
     listOfPickedItems : [],
     pickedItemsListViewId : "pickedItemsListView",
-
+    splitterObj : null,
     // Application Constructor
     initialize: function() {
         this.bindEvents();
@@ -107,6 +129,8 @@ var shopping = {
     receivedEvent: function(id) {
         console.debug('Received Event: ' + id);
 
+        window.addEventListener("orientationchange", shopping.onOrientationChange, false);
+
         /* set click listener for add button. */
         $("#new-item-btn").on("click", this.onAddNewItem);
 
@@ -123,16 +147,58 @@ var shopping = {
                             this.pickedItemsListViewId,
                             listViewPickedItemsTitle);
 
-        var contentHeight = utilities.getContentHeight();
-
+        utilities.getContentWidth();
+        utilities.getContentHeight();
+        utilities.getContentHeightLandscape();
+        utilities.getContentWidthtLandscape();
         /* Add dynamic spiltter between two listviews. By substracting footer height as well as footer height from device height,
             thus we can get the whole height of the content box at runtime for any device height.*/
-        $('.container').width("100%").height(contentHeight).split({
-            orientation: 'horizontal',
-            limit: 10,
-            position: '50%'
-        });
+        shopping.onOrientationChange();
+    },
 
+    onOrientationChange: function(){
+        console.debug("inside onOrientationChange");
+        switch(window.orientation){
+                case 0:
+                    console.log("Portrait");
+                    /* Make sure if device orientation has been changed from Landscape to Portrait or this is initial orientation
+                        upon running app for first time.*/
+                    if(null !== shopping.splitterObj){
+                        shopping.splitterObj.destroy();
+                    }
+
+                    console.log("content width is:" , utilities.contentWidth);
+                    console.log("content height is:" , utilities.contentHeight);
+
+                    shopping.splitterObj =
+                        $('.container').width(utilities.contentWidth).
+                            height(utilities.contentHeight).
+                            split({
+                                orientation: 'horizontal'
+                            });
+                    $('.ui-container').append($('.container'));
+                    break;
+                case 90:
+                case -90:
+                    console.log("Landscape");
+                    /* Make sure if device orientation has been changed from Landscape to Portrait or this is initial orientation
+                        upon running app for first time.*/
+                    if(null !== shopping.splitterObj){
+                        shopping.splitterObj.destroy();
+                    }
+
+                    console.log("content height is:", utilities.contentHeightLandscape);
+                    console.log("content width is:" , utilities.contentWidthLandscape);
+
+                    shopping.splitterObj =
+                        $('.container').width(utilities.contentWidthLandscape).
+                        height(utilities.contentHeightLandscape).
+                        split({
+                            orientation: 'vertical'
+                        });
+                    $('.ui-container').append($('.container'));
+                    break;
+        }
     },
 
     listViewCreate : function(listKey, key ,listViewId, listViewTitle ){

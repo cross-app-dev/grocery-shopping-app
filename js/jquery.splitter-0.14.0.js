@@ -105,13 +105,19 @@
                             var sw = splitter.width();
                             var sw2 = sw/2;
                             if (settings.invisible) {
+                                console.log("*************** invisible");
                                 var pw = panel_1.width(position).outerWidth();
                                 panel_2.width(self.width()-pw);
                                 splitter.css('left', pw-sw2);
                             } else {
+                                console.log("*************** visible");
+
                                 var pw = panel_1.width(position-sw2).outerWidth();
-                                panel_2.width(self.width()-pw-sw);
-                                splitter.css('left', pw);
+                                console.log("left panel width is:", pw);
+                                console.log("splitter width is:", splitter.width());
+                                console.log("total splitter panel width is:", self.width());
+                                panel_2.width(self.width()-pw-sw).css('left', pw + sw +20);
+                                splitter.css('left', pw+10);
                             }
                         }
                         if (!silent) {
@@ -134,6 +140,7 @@
                             } else {
                                 var pw = panel_1.height(position-sw2).outerHeight();
                                 panel_2.height(self.height()-pw-sw);
+                                panel_2.css("left", 0);
                                 splitter.css('top', pw);
                             }
                         }
