@@ -44,8 +44,8 @@
             panel_2 = panel_1.next().addClass('right_panel');
             cls = 'vsplitter';
         } else if (settings.orientation == 'horizontal') {
-            panel_1 = children.first().addClass('top_panel')
-            panel_2 = panel_1.next().addClass('bottom_panel');
+            panel_1 = children.first().addClass('top_panel').width(this.width());
+            panel_2 = panel_1.next().addClass('bottom_panel').width(this.width());
             cls = 'hsplitter';
         }
         if (settings.invisible) {
