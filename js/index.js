@@ -144,6 +144,7 @@ var shopping = {
 
         $(".container").append(listViewHtmlTag);
         $("#"+listViewId).listview().listview("refresh");
+        $('#'+listViewId+' input[type="checkbox"]').checkboxradio().checkboxradio("refresh");
 
         /* set click listeners for remove button and checkbox after creating listview. */
         var removeBtnSelectors = "#"+listViewId + " li a.ui-icon-delete";
