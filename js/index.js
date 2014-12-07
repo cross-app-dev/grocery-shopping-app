@@ -254,7 +254,7 @@ var shopping = {
         4- Update local storage with the new item.
         5- Finally, clear input field to indicate that user can enter extra items again. */
     onAddNewItem : function(event){
-        event.preventDefault();
+//        event.preventDefault();
         var newItem = shopping.getTxtInput();
         shopping.addItemToListView (shopping.listViewId      , newItem);
         shopping.addItemToList     (shopping.listOfGroceries , newItem);
