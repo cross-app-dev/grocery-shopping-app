@@ -51,11 +51,13 @@ var utilities = {
         console.debug("footerHeight = "+ footerHeight);
         var padding = parseInt($('.ui-content').css("padding"));
         console.log("padding is: ", padding);
-        this.contentHeight = deviceHeight-footerHeight-headerHeight - 2*padding;
+//        this.contentHeight = deviceHeight-footerHeight-headerHeight - 2*padding;
+        this.contentHeight = 450;
     },
 
     getContentWidth : function(){
-        this.contentWidth = $('.ui-content').width();
+//        this.contentWidth = $('.ui-content').width();
+        this.contentWidth = 335;
     },
 
     getContentHeightLandscape: function(){
@@ -63,11 +65,13 @@ var utilities = {
         console.debug("headerHeight = "+ headerHeight);
         var footerHeight = $("div[data-role='footer']:visible").outerHeight();
         console.debug("footerHeight = "+ footerHeight);
-        this.contentHeightLandscape = $('.ui-content').width() - footerHeight - headerHeight;
+//        this.contentHeightLandscape = $('.ui-content').width() - footerHeight - headerHeight;
+        this.contentHeightLandscape = 200;
     },
 
     getContentWidthtLandscape : function(){
-        this.contentWidthLandscape = $(window).height();
+//        this.contentWidthLandscape = $(window).height();
+        this.contentWidthLandscape = 585;
     }
 }
 
@@ -134,14 +138,14 @@ var shopping = {
         /* set click listener for add button. */
         $("#new-item-btn").on("click", this.onAddNewItem);
 
-        var listViewGroceriesTitle = '<div class="items-to-buy"><h4>List of items to buy</h4>';
+        var listViewGroceriesTitle = '<div class="items-to-buy"><h4>Wish List</h4>';
         /* pass the list by reference not by value to keep changes outside the function body afterwards. */
         this.listViewCreate("listOfGroceries",
                             this.localStorageKey,
                             this.listViewId,
                             listViewGroceriesTitle);
 
-        var listViewPickedItemsTitle = '<div class="picked-items"><h4>List of picked items</h4>';
+        var listViewPickedItemsTitle = '<div class="picked-items"><h4>Purchased Items</h4>';
         this.listViewCreate("listOfPickedItems",
                             this.pickedItemsLocalStorageKey,
                             this.pickedItemsListViewId,
