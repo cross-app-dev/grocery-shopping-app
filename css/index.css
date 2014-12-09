@@ -163,6 +163,13 @@ background: -ms-linear-gradient(top, rgba(207,231,250,1) 0%,rgba(99,147,193,1) 1
 background: linear-gradient(to bottom, rgba(207,231,250,1) 0%,rgba(99,147,193,1) 100%); /* W3C */
 
 }
+
+#foot .ui-btn{
+    /* Align height of both buttons together*/
+    padding-top: 0.9em;
+    padding-bottom: 0.9em;
+}
+
 /* Media Queries */
 @media screen and (min-width:600px){
     #new-item-form .ui-input-text{
