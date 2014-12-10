@@ -132,11 +132,20 @@ var shopping = {
     // Update DOM on a Received Event
     receivedEvent: function(id) {
         console.debug('Received Event: ' + id);
-
+        var CARRIAGE_RETURN_ASCII_CODE = 13;
         window.addEventListener("orientationchange", shopping.onOrientationChange, false);
 
         /* set click listener for add button. */
         $("#new-item-btn").on("click", this.onAddNewItem);
+        $("#item").keypress(function(e){
+                    var key = e.which || e.keyCode;
+                    console.debug("Key is pressed");
+                    if (CARRIAGE_RETURN_ASCII_CODE === key) {
+                        e.preventDefault();
+                        console.debug("Enter is pressed");
+                        shopping.onAddNewItem();
+                    }
+             });
 
         var listViewGroceriesTitle = '<div class="items-to-buy"><h4>Wish List</h4>';
         /* pass the list by reference not by value to keep changes outside the function body afterwards. */
@@ -260,6 +269,7 @@ var shopping = {
     onAddNewItem : function(event){
 //        event.preventDefault();
         var newItem = shopping.getTxtInput();
+        console.debug("inside onAddNewItem:", newItem);
         shopping.addItemToListView (shopping.listViewId      , newItem);
         shopping.addItemToList     (shopping.listOfGroceries , newItem);
         shopping.updateLocalStorage(shopping.localStorageKey, shopping.listOfGroceries);
