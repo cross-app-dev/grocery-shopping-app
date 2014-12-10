@@ -270,10 +270,15 @@ var shopping = {
 //        event.preventDefault();
         var newItem = shopping.getTxtInput();
         console.debug("inside onAddNewItem:", newItem);
+        if('' === newItem.trim()){
+            alert("Please enter non empty item");
+        }else{
         shopping.addItemToListView (shopping.listViewId      , newItem);
         shopping.addItemToList     (shopping.listOfGroceries , newItem);
         shopping.updateLocalStorage(shopping.localStorageKey, shopping.listOfGroceries);
         shopping.clearTxtField();
+        }
+
     },
 
     /* This method is invoked when the user clicks on remove button in given list view. Actions steps are summarized by:
