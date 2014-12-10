@@ -173,13 +173,13 @@ background: linear-gradient(to bottom, rgba(207,231,250,1) 0%,rgba(99,147,193,1)
 /* Media Queries */
 @media screen and (min-width:600px){
     #new-item-form .ui-input-text{
-        width: 40%;
+        width: 60%;
         float: left;
         margin-right: 2%;
     }
 
     #new-item-form .ui-input-btn{
-        width: 30%;
+        width: 20%;
         float: left;
     }
 }
